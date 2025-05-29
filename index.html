@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kairo - Crypto Intelligence Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0b;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1d 0%, #16213e 100%);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #2a2a2f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            background: #111114;
+            border-right: 1px solid #2a2a2f;
+            padding: 1.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: #1a1a1f;
+            border-left-color: #667eea;
+        }
+
+        .content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1a1a1f 0%, #2a2a2f 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #3a3a3f;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .whale-alert {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            border-left: 4px solid #ff4757;
+        }
+
+        .whale-amount {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .whale-reasoning {
+            background: #1a1a2e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            border-left: 3px solid #667eea;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2a2a2f;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .narrative-item {
+            background: #1a1a2e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            border-left: 3px solid #f39c12;
+        }
+
+        .confidence {
+            background: #00ff88;
+            color: #000;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .api-endpoint {
+            background: #0d1421;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', monospace;
+            color: #00ff88;
+            margin: 0.5rem 0;
+            border: 1px solid #2a2a2f;
+        }
+
+        .enterprise-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">KAIRO</div>
+        <div class="status">
+            <span class="status-dot"></span>
+            <span>Real-time Intelligence Active</span>
+            <div class="enterprise-badge">Enterprise Dashboard</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="nav-item active">🐋 Whale Intelligence</div>
+            <div class="nav-item">📈 Narrative Engine</div>
+            <div class="nav-item">🔗 Cross-Chain Analysis</div>
+            <div class="nav-item">🏛️ Institution Flow</div>
+            <div class="nav-item">⚡ Real-time Alerts</div>
+            <div class="nav-item">🔌 API Access</div>
+        </aside>
+
+        <main class="content">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🐋 Live Whale Movements</h3>
+                        <div class="loading"></div>
+                    </div>
+                    
+                    <div class="whale-alert">
+                        <div class="whale-amount">$24.7M USDC Transfer</div>
+                        <div>0x742d...a8f3 → Binance Hot Wallet</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">2 minutes ago • Ethereum</div>
+                        
+                        <div class="whale-reasoning">
+                            <strong>🧠 AI Analysis:</strong> Large USDC movement to CEX suggests institutional profit-taking. Historical pattern indicates 12% correlation with BTC price drop within 4 hours. Cross-referencing with social sentiment shows bearish narrative building.
+                        </div>
+                    </div>
+
+                    <div class="whale-alert">
+                        <div class="whale-amount">$18.2M ETH Accumulation</div>
+                        <div>Multiple wallets → 0x1f9a...b2c4</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">7 minutes ago • Ethereum</div>
+                        
+                        <div class="whale-reasoning">
+                            <strong>🧠 AI Analysis:</strong> Coordinated ETH accumulation across 7 linked wallets. Pattern matches institutional DCA strategy. Wallet cluster shows $400M+ AUM. High conviction accumulation signal.
+                        </div>
+                    </div>
+
+                    <div class="whale-alert">
+                        <div class="whale-amount">$31.5M ARB Bridge</div>
+                        <div>Ethereum → Arbitrum One</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">12 minutes ago • Cross-chain</div>
+                        
+                        <div class="whale-reasoning">
+                            <strong>🧠 AI Analysis:</strong> Massive bridge activity to Arbitrum coincides with upcoming governance proposal. Wallet analysis reveals venture capital pattern. Likely strategic positioning for protocol influence.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 Market Intelligence</h3>
+                        <span class="confidence">97% Confidence</span>
+                    </div>
+                    
+                    <div class="metric">
+                        <span>Whale Activity Score</span>
+                        <span class="metric-value">8.7/10</span>
+                    </div>
+                    <div class="metric">
+                        <span>Institution Inflow (24h)</span>
+                        <span class="metric-value">+$247M</span>
+                    </div>
+                    <div class="metric">
+                        <span>Smart Money Flow</span>
+                        <span class="metric-value">Accumulating</span>
+                    </div>
+                    <div class="metric">
+                        <span>Narrative Momentum</span>
+                        <span class="metric-value">Bullish</span>
+                    </div>
+                    <div class="metric">
+                        <span>Cross-chain Volume</span>
+                        <span class="metric-value">$1.2B</span>
+                    </div>
+                    <div class="metric">
+                        <span>AI Prediction Score</span>
+                        <span class="metric-value">Long Bias</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🔥 Emerging Narratives</h3>
+                        <span style="font-size: 0.9rem; color: #888;">Powered by Autonomous Reasoning</span>
+                    </div>
+                    
+                    <div class="narrative-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>RWA Tokenization Surge</strong>
+                            <span class="confidence">94%</span>
+                        </div>
+                        <div style="margin-top: 0.5rem; color: #ccc;">
+                            Detected 340% increase in RWA protocol activity. BlackRock partnership rumors driving institutional interest. AI predicts 2-week momentum window.
+                        </div>
+                    </div>
+
+                    <div class="narrative-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>L2 Scaling Wars</strong>
+                            <span class="confidence">87%</span>
+                        </div>
+                        <div style="margin-top: 0.5rem; color: #ccc;">
+                            Arbitrum vs Base competition intensifying. $500M+ bridge volume surge. Fee wars beginning - expect aggressive token incentives.
+                        </div>
+                    </div>
+
+                    <div class="narrative-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>AI Agent Economy</strong>
+                            <span class="confidence">91%</span>
+                        </div>
+                        <div style="margin-top: 0.5rem; color: #ccc;">
+                            Autonomous trading agents showing 23% portfolio outperformance. Institutional adoption accelerating. Infrastructure tokens benefiting.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚡ Chain Activity</h3>
+                        <div class="loading"></div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <div class="card-header">
+                    <h3 class="card-title">🔌 Enterprise API Access</h3>
+                    <div class="enterprise-badge">Institutional Grade</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="margin-bottom: 1rem;">Real-time Data Endpoints</h4>
+                        <div class="api-endpoint">GET /api/v1/whale-movements</div>
+                        <div class="api-endpoint">GET /api/v1/narrative-intelligence</div>
+                        <div class="api-endpoint">GET /api/v1/cross-chain-flow</div>
+                        <div class="api-endpoint">POST /api/v1/custom-alerts</div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 1rem;">Enterprise Features</h4>
+                        <div class="metric">
+                            <span>API Rate Limit</span>
+                            <span class="metric-value">10,000 req/min</span>
+                        </div>
+                        <div class="metric">
+                            <span>Data Latency</span>
+                            <span class="metric-value">< 100ms</span>
+                        </div>
+                        <div class="metric">
+                            <span>Historical Data</span>
+                            <span class="metric-value">5+ Years</span>
+                        </div>
+                        <div class="metric">
+                            <span>Custom Analytics</span>
+                            <span class="metric-value">Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Simulate real-time updates
+        function updateWhaleData() {
+            const amounts = ['$24.7M', '$18.2M', '$31.5M', '$42.1M', '$15.8M'];
+            const cryptos = ['USDC', 'ETH', 'ARB', 'BTC', 'MATIC'];
+            
+            // This would connect to real APIs in production
+            console.log('Fetching whale movements...');
+        }
+
+        // Chart setup
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
+                datasets: [{
+                    label: 'Ethereum',
+                    data: [65, 72, 68, 81, 76, 85],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Polygon',
+                    data: [35, 42, 38, 45, 48, 52],
+                    borderColor: '#8B5CF6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#888' },
+                        grid: { color: '#2a2a2f' }
+                    },
+                    y: {
+                        ticks: { color: '#888' },
+                        grid: { color: '#2a2a2f' }
+                    }
+                }
+            }
+        });
+
+        // Simulate live updates
+        setInterval(updateWhaleData, 5000);
+        
+        // Add some interactivity
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelector('.nav-item.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
