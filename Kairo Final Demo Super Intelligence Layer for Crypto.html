@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAIRO - The Future of Crypto Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.292.0/dist/umd/lucide.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at top, #10122B 0%, #0A0A0F 100%); /* Deep space blue/black */
+            color: #E0E0E0; /* Light grey for text */
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar for a more modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.6); /* Kairo accent */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.8);
+        }
+
+        /* Glassmorphism effect for cards */
+        .glass-card {
+            background: rgba(23, 25, 52, 0.6); /* Slightly transparent dark blue */
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(102, 126, 234, 0.2); /* Subtle Kairo accent border */
+            border-radius: 1rem; /* 16px */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px -12px rgba(102, 126, 234, 0.25); /* Softer, larger shadow */
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+        .glass-card::before { /* Top border highlight */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(102,126,234,0) 0%, rgba(102,126,234,0.8) 50%, rgba(102,126,234,0) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Sidebar active item style */
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+            border-left-color: #8A2BE2; /* Vivid violet for active indicator */
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+        .nav-item:hover {
+             background: rgba(102, 126, 234, 0.1);
+             border-left-color: #667EEA; /* Kairo accent */
+        }
+
+        /* Pulse animation for status dot */
+        @keyframes pulse-strong {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px #00FFDD, 0 0 12px #00FFDD; }
+            50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 12px #00FFDD, 0 0 20px #00FFDD; }
+        }
+        .status-dot-enhanced {
+            width: 10px;
+            height: 10px;
+            background: #00FFDD; /* Bright teal/cyan */
+            border-radius: 50%;
+            animation: pulse-strong 1.8s infinite ease-in-out;
+        }
+
+        /* AI Thinking Dots Animation */
+        @keyframes thinking-wave {
+            0%, 60%, 100% { transform: initial; }
+            30% { transform: translateY(-6px); }
+        }
+        .thinking-dot {
+            width: 6px; height: 6px; background-color: #8A2BE2; border-radius: 50%;
+            animation: thinking-wave 1.5s infinite ease-in-out;
+        }
+        .thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Shimmer for whale alerts */
+        .whale-alert-enhanced::before {
+            content: '';
+            position: absolute;
+            top: -60%; right: -60%;
+            width: 120%; height: 220%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.07), transparent);
+            animation: shimmer-fast 2.5s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes shimmer-fast {
+            0% { transform: translateX(-100%) rotate(35deg); }
+            100% { transform: translateX(100%) rotate(35deg); }
+        }
+        
+        /* Text gradient for KAIRO logo */
+        .text-gradient-kairo {
+            background: linear-gradient(135deg, #8A2BE2 0%, #667EEA 50%, #00FFDD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(102,126,234,0.3);
+        }
+
+        /* Metric value styling */
+        .metric-value-enhanced {
+            font-weight: 700;
+            color: #00FFDD; /* Bright teal for positive values */
+            font-size: 1.1rem; /* Slightly larger */
+        }
+        .metric-trend { font-size: 0.85rem; margin-left: 0.5rem; }
+        .trend-up { color: #00E676; } /* Bright green */
+        .trend-down { color: #FF5252; } /* Bright red */
+
+        /* Narrative confidence badge */
+        .confidence-badge {
+            background: linear-gradient(135deg, #8A2BE2, #667EEA);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px; /* pill shape */
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+        }
+        
+        /* API Endpoint styling */
+        .api-endpoint-enhanced {
+            background: linear-gradient(135deg, rgba(13,20,33,0.8) 0%, rgba(26,26,46,0.8) 100%);
+            border: 1px solid rgba(0,255,221,0.2); /* Teal border */
+        }
+        .api-endpoint-enhanced:hover {
+            border-color: #00FFDD;
+            box-shadow: 0 0 20px rgba(0,255,221,0.25);
+            transform: translateX(5px) scale(1.02);
+        }
+
+        /* Custom animation for number updates */
+        @keyframes count-up {
+            from { opacity: 0.5; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .count-up-animation {
+            animation: count-up 0.5s ease-out;
+        }
+        
+        /* Icon styling */
+        .lucide-icon {
+            stroke-width: 2;
+            width: 1.1em; /* Relative to parent font size */
+            height: 1.1em; /* Relative to parent font size */
+            vertical-align: -0.15em; /* Align with text better */
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-gray-700/50" style="background: rgba(16, 18, 43, 0.85); backdrop-filter: blur(15px) saturate(150%); -webkit-backdrop-filter: blur(15px) saturate(150%);">
+        <div class="text-3xl font-extrabold text-gradient-kairo">KAIRO</div>
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center px-4 py-2 space-x-2 bg-gray-800/50 rounded-full border border-gray-700/70">
+                <span class="status-dot-enhanced"></span>
+                <span class="text-sm font-medium text-cyan-300">AI Brain Active</span>
+            </div>
+            <div class="px-4 py-2 text-sm font-semibold text-white uppercase bg-gradient-to-r from-purple-600 to-blue-600 rounded-full shadow-lg">
+                Enterprise Suite
+            </div>
+        </div>
+    </header>
+
+    <div class="flex" style="height: calc(100vh - 72px);"> <aside class="sticky top-[72px] h-full w-72 flex-shrink-0 p-6 space-y-2 overflow-y-auto border-r border-gray-700/50" style="background: rgba(16, 18, 43, 0.7); backdrop-filter: blur(10px) saturate(120%);">
+            <div class="mb-6">
+                <p class="px-3 mb-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">Intelligence Core</p>
+                <a href="#" class="nav-item group active flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="bar-chart-big" class="lucide-icon text-purple-400 group-hover:text-purple-300"></i><span>Alpha Dashboard</span>
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="users" class="lucide-icon text-blue-400 group-hover:text-blue-300"></i><span>Whale Tracker</span>
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="trending-up" class="lucide-icon text-green-400 group-hover:text-green-300"></i><span>Narrative Engine</span>
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="link" class="lucide-icon text-yellow-400 group-hover:text-yellow-300"></i><span>Cross-Chain Flow</span>
+                </a>
+                 <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="shield-check" class="lucide-icon text-red-400 group-hover:text-red-300"></i><span>Risk Forecaster</span>
+                </a>
+            </div>
+            <div>
+                <p class="px-3 mb-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">Platform Tools</p>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="bell-ring" class="lucide-icon text-indigo-400 group-hover:text-indigo-300"></i><span>Smart Alerts</span>
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="terminal" class="lucide-icon text-teal-400 group-hover:text-teal-300"></i><span>API Console</span>
+                </a>
+                <a href="#" class="nav-item group flex items-center px-4 py-3 space-x-3 text-sm font-medium text-gray-200 rounded-lg border-l-4 border-transparent transition-all duration-200">
+                    <i data-lucide="settings-2" class="lucide-icon text-gray-400 group-hover:text-gray-300"></i><span>Custom Models</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
+                <div class="p-6 glass-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-gray-400">Tracked Volume (24h)</p>
+                        <i data-lucide="dollar-sign" class="w-5 h-5 text-green-400"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-white count-up-animation" id="totalVolume">$3.87B</p>
+                    <p class="text-xs text-green-400 count-up-animation" id="totalVolumeChange">+15.2%</p>
+                </div>
+                <div class="p-6 glass-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-gray-400">Active Whale Wallets</p>
+                        <i data-lucide="contact" class="w-5 h-5 text-blue-400"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-white count-up-animation" id="whaleCount">1,839</p>
+                    <p class="text-xs text-green-400 count-up-animation" id="whaleCountChange">+42 today</p>
+                </div>
+                <div class="p-6 glass-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-gray-400">AI Prediction Accuracy</p>
+                        <i data-lucide="target" class="w-5 h-5 text-purple-400"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-white count-up-animation" id="aiAccuracy">96.3%</p>
+                    <p class="text-xs text-green-400 count-up-animation" id="aiAccuracyChange">Trending Up</p>
+                </div>
+                <div class="p-6 glass-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-gray-400">Dominant Narratives</p>
+                        <i data-lucide="message-circle" class="w-5 h-5 text-yellow-400"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-white count-up-animation" id="narrativeCount">18</p>
+                    <p class="text-xs text-yellow-400 count-up-animation" id="narrativeCountChange">3 New Today</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div class="p-6 lg:col-span-2 glass-card">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="flex items-center text-xl font-semibold text-white">
+                            <i data-lucide="anchor" class="mr-3 text-blue-400 lucide-icon"></i>Live Whale Intelligence
+                        </h3>
+                        <div class="flex items-center space-x-1 text-xs text-purple-400">
+                            <span class="font-medium">AI Processing</span>
+                            <div class="flex space-x-0.5 thinking-dots">
+                                <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="whaleContainer" class="space-y-5 max-h-[500px] overflow-y-auto pr-2">
+                        </div>
+                </div>
+
+                <div class="p-6 glass-card">
+                    <div class="flex items-center justify-between mb-6">
+                         <h3 class="flex items-center text-xl font-semibold text-white">
+                            <i data-lucide="gauge" class="mr-3 text-teal-400 lucide-icon"></i>Alpha Signals
+                        </h3>
+                        <span class="px-2 py-1 text-xs font-bold text-black uppercase bg-teal-400 rounded-full">Real-Time</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="metric">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-300">Whale Activity Score</span>
+                                <span class="metric-value-enhanced" id="whaleScore">9.2/10 <span class="metric-trend trend-up">↗</span></span>
+                            </div>
+                            <div class="w-full h-1.5 mt-1 bg-gray-700 rounded-full">
+                                <div class="h-1.5 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style="width: 92%;"></div>
+                            </div>
+                        </div>
+                         <div class="metric">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-300">Institutional Inflow (24h)</span>
+                                <span class="metric-value-enhanced" id="institutionFlow">+$482M <span class="metric-trend trend-up">↗ +21%</span></span>
+                            </div>
+                             <div class="w-full h-1.5 mt-1 bg-gray-700 rounded-full">
+                                <div class="h-1.5 bg-gradient-to-r from-green-500 to-lime-400 rounded-full" style="width: 78%;"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-300">Smart Money Sentiment</span>
+                                <span class="metric-value-enhanced" id="smartMoney">Strong Accum. <span class="metric-trend trend-up">↗</span></span>
+                            </div>
+                             <div class="w-full h-1.5 mt-1 bg-gray-700 rounded-full">
+                                <div class="h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-300">Narrative Momentum</span>
+                                <span class="metric-value-enhanced" id="narrativeMomentum">Very Bullish <span class="metric-trend trend-up">↗</span></span>
+                            </div>
+                             <div class="w-full h-1.5 mt-1 bg-gray-700 rounded-full">
+                                <div class="h-1.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full" style="width: 90%;"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-300">AI Conviction Score</span>
+                                <span class="metric-value-enhanced" id="aiConfidence">96.3% <span class="metric-trend trend-up">↗</span></span>
+                            </div>
+                            <div class="w-full h-1.5 mt-1 bg-gray-700 rounded-full">
+                                <div class="h-1.5 bg-gradient-to-r from-red-500 to-rose-500 rounded-full" style="width: 96.3%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 mt-8 lg:grid-cols-3">
+                <div class="p-6 lg:col-span-2 glass-card">
+                     <div class="flex items-center justify-between mb-6">
+                        <h3 class="flex items-center text-xl font-semibold text-white">
+                            <i data-lucide="brain" class="mr-3 text-purple-400 lucide-icon"></i>AI-Generated Narratives
+                        </h3>
+                        <span class="confidence-badge">Autonomous Reasoning</span>
+                    </div>
+                    <div id="narrativeContainer" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                        </div>
+                </div>
+
+                <div class="p-6 glass-card">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="flex items-center text-xl font-semibold text-white">
+                           <i data-lucide="activity" class="mr-3 text-green-400 lucide-icon"></i>Chain Activity Index
+                        </h3>
+                        <div class="w-4 h-4 border-2 rounded-full border-t-transparent border-green-400 animate-spin"></div>
+                    </div>
+                    <div class="h-[350px] relative">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 mt-8 glass-card">
+                <div class="flex flex-col items-center justify-between mb-6 md:flex-row">
+                    <h3 class="flex items-center text-2xl font-semibold text-white">
+                        <i data-lucide="server" class="mr-3 text-indigo-400 lucide-icon"></i>Enterprise API & Intelligence Layer
+                    </h3>
+                    <span class="mt-2 md:mt-0 px-3 py-1.5 text-sm font-bold text-white uppercase bg-gradient-to-r from-indigo-600 to-purple-700 rounded-full shadow-md">Institutional Grade</span>
+                </div>
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+                    <div>
+                        <h4 class="mb-4 text-lg font-semibold text-indigo-300">Real-time Intelligence Endpoints</h4>
+                        <div class="space-y-3">
+                            <div class="api-endpoint-enhanced group relative flex items-center p-3 space-x-3 text-sm font-mono text-green-300 rounded-lg cursor-pointer transition-all duration-200">
+                                <span class="font-bold text-green-500">GET</span> <span>/v1/whale-intelligence</span> <i data-lucide="copy" class="absolute w-4 h-4 text-gray-500 transition-opacity opacity-0 right-3 group-hover:opacity-100"></i>
+                            </div>
+                            <div class="api-endpoint-enhanced group relative flex items-center p-3 space-x-3 text-sm font-mono text-green-300 rounded-lg cursor-pointer transition-all duration-200">
+                                <span class="font-bold text-green-500">GET</span> <span>/v1/narrative-engine</span><i data-lucide="copy" class="absolute w-4 h-4 text-gray-500 transition-opacity opacity-0 right-3 group-hover:opacity-100"></i>
+                            </div>
+                             <div class="api-endpoint-enhanced group relative flex items-center p-3 space-x-3 text-sm font-mono text-green-300 rounded-lg cursor-pointer transition-all duration-200">
+                                <span class="font-bold text-green-500">GET</span> <span>/v1/risk-forecasts</span><i data-lucide="copy" class="absolute w-4 h-4 text-gray-500 transition-opacity opacity-0 right-3 group-hover:opacity-100"></i>
+                            </div>
+                            <div class="api-endpoint-enhanced group relative flex items-center p-3 space-x-3 text-sm font-mono text-green-300 rounded-lg cursor-pointer transition-all duration-200">
+                                <span class="font-bold text-orange-400">POST</span> <span>/v1/custom-alerts</span><i data-lucide="copy" class="absolute w-4 h-4 text-gray-500 transition-opacity opacity-0 right-3 group-hover:opacity-100"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="mb-4 text-lg font-semibold text-indigo-300">Platform Capabilities</h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between p-3 bg-gray-800/30 rounded-lg"><span>API Rate Limit:</span> <span class="font-semibold text-indigo-300">100,000 req/min</span></div>
+                            <div class="flex justify-between p-3 bg-gray-800/30 rounded-lg"><span>Data Latency:</span> <span class="font-semibold text-indigo-300">&lt; 30ms</span></div>
+                            <div class="flex justify-between p-3 bg-gray-800/30 rounded-lg"><span>Historical Coverage:</span> <span class="font-semibold text-indigo-300">7+ Years Deep</span></div>
+                            <div class="flex justify-between p-3 bg-gray-800/30 rounded-lg"><span>Supported Chains:</span> <span class="font-semibold text-indigo-300">25+ Networks</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <footer class="pt-8 mt-8 text-center border-t border-gray-700/50">
+                <p class="text-sm text-gray-500">&copy; <span id="currentYear"></span> KAIRO Intelligence. All rights reserved. Powering the future of crypto.</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // --- Enhanced Data Pools & Simulation Logic ---
+        const whaleTransactions = [
+            { amount: '$128.5M', token: 'ETH', from: '0xAlphaWhale...7b3d', to: 'NEXUS Prime Custody', chain: 'Ethereum', timeAgo: '2m ago',
+              analysis: '<strong>KAIRO AI Insight:</strong> Major institutional accumulation. Wallet linked to $5B AUM fund. Pattern suggests pre-announcement positioning for upcoming ETH ETF news. High conviction signal. Projected Impact: Significant.',
+              impact: 'high', confidence: '97%', icon: 'shield-check', iconColor: 'text-green-400' },
+            { amount: '$72.1M', token: 'USDC', from: 'Genesis Trading', to: '0xSmartTrader...c4e1', chain: 'Solana', timeAgo: '5m ago',
+              analysis: '<strong>KAIRO AI Insight:</strong> Large stablecoin movement to active trading wallet. Cross-referenced with on-chain order book depth, indicates preparation for substantial altcoin acquisition. Medium-term bullish.',
+              impact: 'medium', confidence: '91%', icon: 'trending-up', iconColor: 'text-yellow-400' },
+            { amount: '$250.9M', token: 'BTC', from: 'BitFinex Cold', to: 'Fidelity Digital Assets', chain: 'Bitcoin', timeAgo: '12m ago',
+              analysis: '<strong>KAIRO AI Insight:</strong> Top-tier institutional BTC custody transfer. Aligns with quarterly treasury rebalancing of a Fortune 100 company. Signals strong long-term belief in BTC as a reserve asset.',
+              impact: 'high', confidence: '99%', icon: 'lock', iconColor: 'text-blue-400' },
+            { amount: '$45.3M', token: 'RNDR', from: 'Decentralized Exchange', to: '0xAIRenderFarm...9f0a', chain: 'Arbitrum', timeAgo: '18m ago',
+              analysis: '<strong>KAIRO AI Insight:</strong> Significant accumulation of AI-related token by a known AI research consortium. Indicates strategic investment in decentralized compute resources. Narrative strengthening.',
+              impact: 'medium', confidence: '93%', icon: 'cpu', iconColor: 'text-purple-400' },
+             { amount: '$92.7M', token: 'LINK', from: 'Chainlink Treasury', to: 'Oracle Staking Pool X', chain: 'Ethereum', timeAgo: '25m ago',
+              analysis: '<strong>KAIRO AI Insight:</strong> Large-scale staking by core entities. Demonstrates commitment to network security and long-term value accrual. Reduces circulating supply, potentially bullish price pressure.',
+              impact: 'medium', confidence: '94%', icon: 'link', iconColor: 'text-sky-400' }
+        ];
+
+        const narratives = [
+            { title: 'AI-Agent Driven DeFi Yields', confidence: '98%', trend: 'Strong Up', icon: 'zap', iconColor: 'text-yellow-400',
+              description: '<strong>KAIRO AI Analysis:</strong> Autonomous AI agents are outperforming traditional yield farming by 35-50%. Protocols integrating KAIRO-verified agents are seeing exponential TVL growth. Expect AI-token premiums.' },
+            { title: 'Real-World Asset (RWA) Tokenization Wave 2.0', confidence: '95%', trend: 'Accelerating', icon: 'landmark', iconColor: 'text-green-400',
+              description: '<strong>KAIRO AI Analysis:</strong> Beyond treasuries; tokenized private equity, real estate, and carbon credits are gaining traction. KAIRO identifies key RWA infrastructure plays with 10x potential.' },
+            { title: 'Intent-Centric Architecture & Cross-Chain UX', confidence: '93%', trend: 'Rapid Adoption', icon: 'shuffle', iconColor: 'text-blue-400',
+              description: '<strong>KAIRO AI Analysis:</strong> Users demand seamless cross-chain experiences. Intent-based protocols abstracting complexities are capturing significant market share. KAIRO flags emerging leaders.' },
+            { title: 'Decentralized Physical Infrastructure Networks (DePIN)', confidence: '90%', trend: 'Growing Steadily', icon: 'wifi', iconColor: 'text-purple-400',
+              description: '<strong>KAIRO AI Analysis:</strong> Token incentives are successfully bootstrapping real-world infrastructure (wireless, storage, compute). KAIRO tracks DePIN projects with sustainable tokenomics and high utility.' },
+            { title: 'Modular Blockchain & AppChain Thesis', confidence: '92%', trend: 'Maturing', icon: 'puzzle', iconColor: 'text-orange-500',
+              description: '<strong>KAIRO AI Analysis:</strong> Specialization in blockchain layers (settlement, execution, DA) is unlocking new scalability. KAIRO identifies high-throughput app-specific chains poised for breakout growth.'}
+        ];
+
+        // --- DOM Elements ---
+        const whaleContainer = document.getElementById('whaleContainer');
+        const narrativeContainer = document.getElementById('narrativeContainer');
+        // Stat elements
+        const totalVolumeEl = document.getElementById('totalVolume');
+        const totalVolumeChangeEl = document.getElementById('totalVolumeChange');
+        const whaleCountEl = document.getElementById('whaleCount');
+        const whaleCountChangeEl = document.getElementById('whaleCountChange');
+        const aiAccuracyEl = document.getElementById('aiAccuracy');
+        const aiAccuracyChangeEl = document.getElementById('aiAccuracyChange');
+        const narrativeCountEl = document.getElementById('narrativeCount');
+        const narrativeCountChangeEl = document.getElementById('narrativeCountChange');
+        // Metric elements
+        const whaleScoreEl = document.getElementById('whaleScore');
+        const institutionFlowEl = document.getElementById('institutionFlow');
+        const smartMoneyEl = document.getElementById('smartMoney');
+        const narrativeMomentumEl = document.getElementById('narrativeMomentum');
+        const aiConfidenceEl = document.getElementById('aiConfidence');
+
+
+        // --- Utility Functions ---
+        function formatStat(value, prefix = '', suffix = '', decimals = 2) {
+            const num = parseFloat(value);
+            return `${prefix}${num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+        }
+        
+        function animateValue(element, start, end, duration, prefix = '', suffix = '', decimals = 2, isBillion = false) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                let currentValue = progress * (end - start) + start;
+                if (isBillion) {
+                     element.textContent = `${prefix}${(currentValue / 1000000000).toFixed(decimals)}B${suffix}`;
+                } else if (decimals === 0) {
+                     element.textContent = `${prefix}${Math.floor(currentValue).toLocaleString()}${suffix}`;
+                }
+                else {
+                    element.textContent = `${prefix}${currentValue.toFixed(decimals)}${suffix}`;
+                }
+                if (element && typeof element.classList !== 'undefined' && typeof element.classList.add === 'function') {
+                    element.classList.add('count-up-animation');
+                    setTimeout(() => {
+                        if (element && typeof element.classList !== 'undefined' && typeof element.classList.remove === 'function') {
+                            element.classList.remove('count-up-animation');
+                        }
+                    }, 500);
+                }
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+
+        // --- Dynamic Content Update Functions ---
+        let currentWhaleIndex = 0;
+        function displayWhaleAlert() {
+            if (!whaleContainer) return;
+            const whale = whaleTransactions[currentWhaleIndex % whaleTransactions.length];
+            currentWhaleIndex++;
+
+            const alertEl = document.createElement('div');
+            alertEl.className = `whale-alert-enhanced relative p-5 rounded-xl border border-gray-700/80 shadow-lg overflow-hidden transition-all duration-500 ease-out transform opacity-0 translate-y-5 ${whale.impact === 'high' ? 'bg-red-700/20 border-red-500/50' : 'bg-yellow-600/15 border-yellow-500/50'}`;
+            
+            const iconName = whale.icon || (whale.impact === 'high' ? 'alert-triangle' : 'info');
+            const iconColorClass = whale.iconColor || (whale.impact === 'high' ? 'text-red-400' : 'text-yellow-400');
+
+            alertEl.innerHTML = `
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 mt-1">
+                         <i data-lucide="${iconName}" class="w-6 h-6 ${iconColorClass}"></i>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between mb-1">
+                            <p class="text-lg font-bold text-white">${whale.amount} ${whale.token}</p>
+                            <span class="text-xs text-gray-400">${whale.timeAgo} on ${whale.chain}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">
+                            <span class="font-medium text-gray-400">From:</span> ${whale.from} → 
+                            <span class="font-medium text-gray-400">To:</span> ${whale.to}
+                        </p>
+                        <div class="p-3 mt-2 text-sm text-gray-300 rounded-md bg-black/30 border border-gray-600/50">
+                            ${whale.analysis}
+                        </div>
+                        <div class="flex items-center justify-end mt-3 space-x-2 text-xs">
+                            <span class="px-2 py-1 font-semibold text-white ${whale.impact === 'high' ? 'bg-red-500/70' : 'bg-yellow-500/70'} rounded-full">Impact: ${whale.impact.toUpperCase()}</span>
+                            <span class="px-2 py-1 font-semibold text-white bg-purple-500/70 rounded-full">AI Confidence: ${whale.confidence}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (whaleContainer.firstChild) {
+                whaleContainer.insertBefore(alertEl, whaleContainer.firstChild);
+            } else {
+                whaleContainer.appendChild(alertEl);
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons({ nodes: [alertEl] });
+            }
+
+            setTimeout(() => {
+                if (alertEl && alertEl.classList && typeof alertEl.classList.remove === 'function' && typeof alertEl.classList.add === 'function') {
+                    alertEl.classList.remove('opacity-0', 'translate-y-5');
+                    alertEl.classList.add('opacity-100', 'translate-y-0');
+                } else {
+                    console.error("displayWhaleAlert: alertEl.classList.remove or .add is not a function", alertEl);
+                }
+            }, 50);
+
+            if (whaleContainer.children.length > 5) {
+                const lastChild = whaleContainer.lastChild;
+                if (lastChild && lastChild.classList && typeof lastChild.classList.add === 'function') {
+                    lastChild.classList.add('opacity-0', 'scale-95');
+                }
+                setTimeout(() => {
+                    if (lastChild && typeof lastChild.remove === 'function') {
+                        lastChild.remove();
+                    }
+                }, 500);
+            }
+        }
+
+        let currentNarrativeIndex = 0;
+        function displayNarrative() {
+            if (!narrativeContainer) return;
+            const narrative = narratives[currentNarrativeIndex % narratives.length];
+            currentNarrativeIndex++;
+
+            const narrativeEl = document.createElement('div');
+            narrativeEl.className = 'p-5 rounded-xl border border-gray-700/80 bg-gray-800/30 shadow-lg transition-all duration-500 ease-out transform opacity-0 translate-x-5';
+            narrativeEl.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="flex items-center text-md font-semibold text-white">
+                        <i data-lucide="${narrative.icon}" class="w-5 h-5 mr-2 ${narrative.iconColor}"></i>
+                        ${narrative.title}
+                    </h4>
+                    <span class="confidence-badge">${narrative.confidence}</span>
+                </div>
+                <p class="mb-3 text-sm text-gray-300">${narrative.description}</p>
+                <div class="text-xs font-medium text-right ${narrative.trend.includes('Up') || narrative.trend.includes('Accelerating') ? 'text-green-400' : 'text-yellow-400'}">
+                    Trend: ${narrative.trend} ${narrative.trend.includes('Up') || narrative.trend.includes('Accelerating') ? '▲' : '►'}
+                </div>
+            `;
+
+            if (narrativeContainer.firstChild) {
+                narrativeContainer.insertBefore(narrativeEl, narrativeContainer.firstChild);
+            } else {
+                narrativeContainer.appendChild(narrativeEl);
+            }
+            if (typeof lucide !== 'undefined') { 
+                lucide.createIcons({ nodes: [narrativeEl] });
+            }
+
+            setTimeout(() => {
+                if (narrativeEl && narrativeEl.classList && typeof narrativeEl.classList.remove === 'function' && typeof narrativeEl.classList.add === 'function') {
+                    narrativeEl.classList.remove('opacity-0', 'translate-x-5');
+                    narrativeEl.classList.add('opacity-100', 'translate-x-0');
+                } else {
+                     console.error("displayNarrative: narrativeEl.classList.remove or .add is not a function", narrativeEl);
+                }
+            }, 50);
+            
+            if (narrativeContainer.children.length > 4) {
+                 const lastChild = narrativeContainer.lastChild;
+                 if (lastChild && lastChild.classList && typeof lastChild.classList.add === 'function') {
+                    lastChild.classList.add('opacity-0', 'scale-95');
+                 }
+                setTimeout(() => {
+                    if (lastChild && typeof lastChild.remove === 'function') {
+                        lastChild.remove();
+                    }
+                }, 500);
+            }
+        }
+
+        // --- Chart Configuration ---
+        const activityChartCtx = document.getElementById('activityChart')?.getContext('2d');
+        let activityChart;
+
+        if (activityChartCtx) {
+            const gradientBlue = activityChartCtx.createLinearGradient(0, 0, 0, 300);
+            gradientBlue.addColorStop(0, 'rgba(102, 126, 234, 0.5)'); 
+            gradientBlue.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
+
+            const gradientPurple = activityChartCtx.createLinearGradient(0, 0, 0, 300);
+            gradientPurple.addColorStop(0, 'rgba(138, 43, 226, 0.5)'); 
+            gradientPurple.addColorStop(1, 'rgba(138, 43, 226, 0.05)');
+
+            const gradientTeal = activityChartCtx.createLinearGradient(0, 0, 0, 300);
+            gradientTeal.addColorStop(0, 'rgba(0, 255, 221, 0.5)'); 
+            gradientTeal.addColorStop(1, 'rgba(0, 255, 221, 0.05)');
+
+            activityChart = new Chart(activityChartCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [
+                        {
+                            label: 'Ethereum Activity',
+                            data: [65, 72, 68, 81, 76, 85, 79],
+                            borderColor: '#667EEA', 
+                            backgroundColor: gradientBlue,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#667EEA',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 7,
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#667EEA',
+                            borderWidth: 2.5,
+                        },
+                        {
+                            label: 'Solana Activity',
+                            data: [35, 42, 38, 55, 60, 68, 62],
+                            borderColor: '#8A2BE2', 
+                            backgroundColor: gradientPurple,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#8A2BE2',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 7,
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#8A2BE2',
+                            borderWidth: 2.5,
+                        },
+                         {
+                            label: 'Arbitrum Activity',
+                            data: [25, 30, 48, 40, 55, 60, 50],
+                            borderColor: '#00FFDD', 
+                            backgroundColor: gradientTeal,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#00FFDD',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 7,
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#00FFDD',
+                            borderWidth: 2.5,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#E0E0E0', font: { size: 12 } }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(10, 10, 15, 0.85)',
+                            titleColor: '#E0E0E0',
+                            bodyColor: '#C0C0C0',
+                            borderColor: 'rgba(102, 126, 234, 0.5)',
+                            borderWidth: 1,
+                            padding: 10,
+                            cornerRadius: 8,
+                            titleFont: { weight: 'bold'},
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#9CA3AF', font: { size: 11 } }, 
+                            grid: { color: 'rgba(102, 126, 234, 0.1)',  borderDash: [3, 3] }
+                        },
+                        y: {
+                            ticks: { color: '#9CA3AF', font: { size: 11 } },
+                            grid: { color: 'rgba(102, 126, 234, 0.15)' },
+                            beginAtZero: true
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+        
+        // --- Update Stats & Metrics periodically ---
+        function updateStats() {
+            // Total Volume
+            if (totalVolumeEl) {
+                const oldVolumeText = totalVolumeEl.textContent || "$0B";
+                const oldVolume = parseFloat(oldVolumeText.replace('$', '').replace('B', '')) * 1000000000;
+                const newVolume = oldVolume * (1 + (Math.random() - 0.45) * 0.05); 
+                animateValue(totalVolumeEl, oldVolume, newVolume, 1000, '$', '', 2, true);
+                if (totalVolumeChangeEl) {
+                    const volumeChange = ((newVolume - oldVolume) / oldVolume) * 100;
+                    totalVolumeChangeEl.textContent = `${volumeChange >= 0 ? '+' : ''}${volumeChange.toFixed(1)}%`;
+                    totalVolumeChangeEl.className = `text-xs count-up-animation ${volumeChange >= 0 ? 'text-green-400' : 'text-red-400'}`;
+                }
+            }
+
+            // Whale Count
+            if (whaleCountEl) {
+                const oldWhaleCountText = whaleCountEl.textContent || "0";
+                const oldWhaleCount = parseInt(oldWhaleCountText.replace(',', ''));
+                const whaleChange = Math.floor(Math.random() * 5) - 2; 
+                const newWhaleCount = oldWhaleCount + whaleChange;
+                animateValue(whaleCountEl, oldWhaleCount, newWhaleCount, 1000, '', '', 0);
+                if (whaleCountChangeEl) {
+                    whaleCountChangeEl.textContent = `${whaleChange >= 0 ? '+' : ''}${whaleChange} today`;
+                    whaleCountChangeEl.className = `text-xs count-up-animation ${whaleChange >= 0 ? 'text-green-400' : 'text-red-400'}`;
+                }
+            }
+
+            // AI Accuracy
+            if (aiAccuracyEl) {
+                const oldAccuracyText = aiAccuracyEl.textContent || "0%";
+                const oldAccuracy = parseFloat(oldAccuracyText.replace('%', ''));
+                const newAccuracy = Math.min(99.9, Math.max(90.0, oldAccuracy + (Math.random() - 0.48) * 0.2)); 
+                animateValue(aiAccuracyEl, oldAccuracy, newAccuracy, 1000, '', '%', 1);
+                if (aiAccuracyChangeEl) {
+                    aiAccuracyChangeEl.textContent = newAccuracy > oldAccuracy ? "Trending Up" : (newAccuracy < oldAccuracy ? "Slight Dip" : "Stable");
+                    aiAccuracyChangeEl.className = `text-xs count-up-animation ${newAccuracy >= oldAccuracy ? 'text-green-400' : 'text-yellow-400'}`;
+                }
+            }
+
+            // Narrative Count
+            if (narrativeCountEl) {
+                const oldNarrativeCountText = narrativeCountEl.textContent || "0";
+                const oldNarrativeCount = parseInt(oldNarrativeCountText);
+                const narrativeChange = Math.random() > 0.8 ? (Math.random() > 0.5 ? 1: -1) : 0; 
+                const newNarrativeCount = Math.max(5, oldNarrativeCount + narrativeChange);
+                animateValue(narrativeCountEl, oldNarrativeCount, newNarrativeCount, 1000, '', '', 0);
+                if (narrativeCountChangeEl && narrativeChange !== 0) {
+                    narrativeCountChangeEl.textContent = `${narrativeChange > 0 ? '+' : ''}${narrativeChange} New Today`;
+                    narrativeCountChangeEl.className = `text-xs count-up-animation ${narrativeChange > 0 ? 'text-yellow-400' : 'text-orange-400'}`;
+                }
+            }
+
+            // Update other metrics
+            if (whaleScoreEl) whaleScoreEl.innerHTML = `${(Math.random() * 0.5 + 8.8).toFixed(1)}/10 <span class="metric-trend ${Math.random() > 0.3 ? 'trend-up' : 'trend-down'}">${Math.random() > 0.3 ? '↗' : '↘'}</span>`;
+            if (institutionFlowEl) institutionFlowEl.innerHTML = `+$${(Math.random() * 100 + 400).toFixed(0)}M <span class="metric-trend trend-up">↗ +${(Math.random()*10+15).toFixed(0)}%</span>`;
+            if (smartMoneyEl) smartMoneyEl.innerHTML = `${Math.random() > 0.2 ? 'Strong Accum.' : 'Accumulating'} <span class="metric-trend trend-up">↗</span>`;
+            if (narrativeMomentumEl) narrativeMomentumEl.innerHTML = `${Math.random() > 0.2 ? 'Very Bullish' : 'Bullish'} <span class="metric-trend trend-up">↗</span>`;
+            if (aiConfidenceEl) aiConfidenceEl.innerHTML = `${(Math.random() * 2 + 94.5).toFixed(1)}% <span class="metric-trend trend-up">↗</span>`;
+
+            document.querySelectorAll('.metric .bg-gradient-to-r').forEach(bar => {
+                const metricValueEnhanced = bar.closest('.metric')?.querySelector('.metric-value-enhanced');
+                if (metricValueEnhanced) {
+                    const currentScoreText = metricValueEnhanced.textContent || "0";
+                    let score = parseFloat(currentScoreText);
+                    if (currentScoreText.includes('/10')) score = parseFloat(currentScoreText.split('/10')[0]) * 10;
+                    if (currentScoreText.includes('%')) score = parseFloat(currentScoreText.split('%')[0]);
+                    if (isNaN(score)) score = Math.random() * 30 + 60; 
+                    bar.style.width = `${Math.min(100, Math.max(0, score))}%`;
+                }
+            });
+        }
+
+        function updateChartData() {
+            if (!activityChart || !activityChart.data || !activityChart.data.datasets) return;
+            activityChart.data.datasets.forEach(dataset => {
+                if (dataset.data && Array.isArray(dataset.data)) {
+                    dataset.data = dataset.data.map(() => Math.random() * 50 + 50); 
+                }
+            });
+            activityChart.update('none'); 
+        }
+
+        // --- Initial Load & Interval Timers ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') { 
+                 lucide.createIcons(); 
+            }
+            const currentYearEl = document.getElementById('currentYear');
+            if (currentYearEl) {
+                currentYearEl.textContent = new Date().getFullYear().toString();
+            }
+
+
+            displayWhaleAlert(); 
+            displayNarrative(); 
+            updateStats(); 
+
+            setInterval(displayWhaleAlert, 6000); 
+            setInterval(displayNarrative, 7500); 
+            setInterval(updateStats, 4000); 
+            setInterval(updateChartData, 8000); 
+
+            document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const activeItem = document.querySelector('.sidebar .nav-item.active');
+                    if (activeItem) activeItem.classList.remove('active');
+                    this.classList.add('active');
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
