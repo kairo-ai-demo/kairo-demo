@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kairo - Crypto Intelligence Platform</title>
+    <title>Kairo - AI-Powered Crypto Intelligence Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -14,33 +14,49 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0a0b;
+            background: radial-gradient(ellipse at top, #0f0f23 0%, #000000 100%);
             color: #ffffff;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #1a1a1d 0%, #16213e 100%);
+            background: linear-gradient(135deg, rgba(26,26,29,0.95) 0%, rgba(22,33,62,0.95) 100%);
+            backdrop-filter: blur(20px);
             padding: 1rem 2rem;
-            border-bottom: 1px solid #2a2a2f;
+            border-bottom: 1px solid rgba(102,126,234,0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #00d4ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 0 30px rgba(102,126,234,0.3);
         }
 
         .status {
             display: flex;
             align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
             gap: 0.5rem;
+            background: rgba(0,255,136,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            border: 1px solid rgba(0,255,136,0.3);
         }
 
         .status-dot {
@@ -49,37 +65,80 @@
             background: #00ff88;
             border-radius: 50%;
             animation: pulse 2s infinite;
+            box-shadow: 0 0 10px #00ff88;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
         }
 
         .main-container {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            height: calc(100vh - 80px);
+            grid-template-columns: 320px 1fr;
+            min-height: calc(100vh - 80px);
         }
 
         .sidebar {
-            background: #111114;
-            border-right: 1px solid #2a2a2f;
-            padding: 1.5rem;
+            background: linear-gradient(180deg, rgba(17,17,20,0.95) 0%, rgba(26,26,31,0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(102,126,234,0.2);
+            padding: 2rem 1.5rem;
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            color: #888;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
         }
 
         .nav-item {
-            padding: 0.75rem 1rem;
-            margin: 0.25rem 0;
-            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            transition: left 0.3s ease;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            left: 0;
         }
 
         .nav-item:hover, .nav-item.active {
-            background: #1a1a1f;
-            border-left-color: #667eea;
+            background: rgba(102,126,234,0.1);
+            border-color: rgba(102,126,234,0.5);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.2);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.2) 100%);
+            border-color: #667eea;
         }
 
         .content {
@@ -94,54 +153,132 @@
             margin-bottom: 2rem;
         }
 
+        .full-width-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
         .card {
-            background: linear-gradient(135deg, #1a1a1f 0%, #2a2a2f 100%);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid #3a3a3f;
-            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(26,26,31,0.9) 0%, rgba(42,42,47,0.9) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(102,126,234,0.2);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #00d4ff);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(102,126,234,0.15);
+            border-color: rgba(102,126,234,0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .whale-alert {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            background: linear-gradient(135deg, rgba(255,107,107,0.9) 0%, rgba(238,90,36,0.9) 100%);
             color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 0.5rem 0;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
             border-left: 4px solid #ff4757;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .whale-alert::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
         }
 
         .whale-amount {
-            font-size: 1.4rem;
-            font-weight: 700;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .whale-reasoning {
-            background: #1a1a2e;
+            background: rgba(26,26,46,0.9);
             padding: 1rem;
             border-radius: 8px;
             margin-top: 0.5rem;
             border-left: 3px solid #667eea;
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .metric {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #2a2a2f;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(42,42,47,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .metric:hover {
+            padding-left: 1rem;
+            background: rgba(102,126,234,0.05);
+            border-radius: 8px;
         }
 
         .metric:last-child {
@@ -149,58 +286,90 @@
         }
 
         .metric-value {
-            font-weight: 600;
+            font-weight: 700;
             color: #00ff88;
+            font-size: 1.1rem;
         }
 
+        .metric-trend {
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .trend-up { color: #00ff88; }
+        .trend-down { color: #ff6b6b; }
+
         .narrative-item {
-            background: #1a1a2e;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 0.5rem 0;
+            background: linear-gradient(135deg, rgba(26,26,46,0.9) 0%, rgba(42,42,62,0.9) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
             border-left: 3px solid #f39c12;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .narrative-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 25px rgba(243,156,18,0.2);
         }
 
         .confidence {
-            background: #00ff88;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
             color: #000;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .chart-container {
             height: 300px;
             margin-top: 1rem;
+            position: relative;
         }
 
         .api-endpoint {
-            background: #0d1421;
+            background: linear-gradient(135deg, rgba(13,20,33,0.9) 0%, rgba(26,26,46,0.9) 100%);
             padding: 1rem;
             border-radius: 8px;
-            font-family: 'Monaco', monospace;
+            font-family: 'Monaco', 'Consolas', monospace;
             color: #00ff88;
             margin: 0.5rem 0;
-            border: 1px solid #2a2a2f;
+            border: 1px solid rgba(0,255,136,0.3);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .api-endpoint:hover {
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.3);
+            transform: translateX(5px);
         }
 
         .enterprise-badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            border-radius: 25px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
         }
 
         .loading {
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid #667eea;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(102,126,234,0.3);
             border-radius: 50%;
-            border-top-color: transparent;
+            border-top-color: #667eea;
             animation: spin 1s linear infinite;
         }
 
@@ -211,141 +380,264 @@
         .full-width {
             grid-column: 1 / -1;
         }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(102,126,234,0.3);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102,126,234,0.2);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00ff88;
+            display: block;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @keyframes slideInFromLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutToRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .slide-in {
+            animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-out {
+            animation: slideOutToRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ai-thinking {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #667eea;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .thinking-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .thinking-dot {
+            width: 4px;
+            height: 4px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: thinking 1.5s infinite;
+        }
+
+        .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes thinking {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+
+        .price-impact {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .impact-high {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+
+        .impact-medium {
+            background: rgba(243,156,18,0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243,156,18,0.3);
+        }
+
+        .impact-low {
+            background: rgba(0,255,136,0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0,255,136,0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 280px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .dashboard-grid,
+            .full-width-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="logo">KAIRO</div>
         <div class="status">
-            <span class="status-dot"></span>
-            <span>Real-time Intelligence Active</span>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>AI Intelligence Active</span>
+            </div>
             <div class="enterprise-badge">Enterprise Dashboard</div>
         </div>
     </header>
 
     <div class="main-container">
         <aside class="sidebar">
-            <div class="nav-item active">🐋 Whale Intelligence</div>
-            <div class="nav-item">📈 Narrative Engine</div>
-            <div class="nav-item">🔗 Cross-Chain Analysis</div>
-            <div class="nav-item">🏛️ Institution Flow</div>
-            <div class="nav-item">⚡ Real-time Alerts</div>
-            <div class="nav-item">🔌 API Access</div>
+            <div class="nav-section">
+                <div class="nav-section-title">Intelligence</div>
+                <div class="nav-item active">🐋 Whale Intelligence</div>
+                <div class="nav-item">🧠 AI Narratives</div>
+                <div class="nav-item">🔗 Cross-Chain Flow</div>
+                <div class="nav-item">🏛️ Institution Tracker</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Analytics</div>
+                <div class="nav-item">📊 Market Sentiment</div>
+                <div class="nav-item">⚡ Real-time Alerts</div>
+                <div class="nav-item">🎯 Risk Assessment</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Platform</div>
+                <div class="nav-item">🔌 API Access</div>
+                <div class="nav-item">⚙️ Custom Models</div>
+            </div>
         </aside>
 
         <main class="content">
+            <!-- Key Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalVolume">$2.4B</span>
+                    <div class="stat-label">24h Tracked Volume</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="whaleCount">1,247</span>
+                    <div class="stat-label">Active Whale Wallets</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="aiAccuracy">94.7%</span>
+                    <div class="stat-label">AI Prediction Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="narrativeCount">12</span>
+                    <div class="stat-label">Active Narratives</div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard -->
             <div class="dashboard-grid">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">🐋 Live Whale Movements</h3>
-                        <div class="loading"></div>
+                        <h3 class="card-title">🐋 Live Whale Intelligence</h3>
+                        <div class="ai-thinking">
+                            <span>AI Processing</span>
+                            <div class="thinking-dots">
+                                <div class="thinking-dot"></div>
+                                <div class="thinking-dot"></div>
+                                <div class="thinking-dot"></div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="whale-alert">
-                        <div class="whale-amount">$24.7M USDC Transfer</div>
-                        <div>0x742d...a8f3 → Binance Hot Wallet</div>
-                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">2 minutes ago • Ethereum</div>
-                        
-                        <div class="whale-reasoning">
-                            <strong>🧠 AI Analysis:</strong> Large USDC movement to CEX suggests institutional profit-taking. Historical pattern indicates 12% correlation with BTC price drop within 4 hours. Cross-referencing with social sentiment shows bearish narrative building.
-                        </div>
-                    </div>
-
-                    <div class="whale-alert">
-                        <div class="whale-amount">$18.2M ETH Accumulation</div>
-                        <div>Multiple wallets → 0x1f9a...b2c4</div>
-                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">7 minutes ago • Ethereum</div>
-                        
-                        <div class="whale-reasoning">
-                            <strong>🧠 AI Analysis:</strong> Coordinated ETH accumulation across 7 linked wallets. Pattern matches institutional DCA strategy. Wallet cluster shows $400M+ AUM. High conviction accumulation signal.
-                        </div>
-                    </div>
-
-                    <div class="whale-alert">
-                        <div class="whale-amount">$31.5M ARB Bridge</div>
-                        <div>Ethereum → Arbitrum One</div>
-                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">12 minutes ago • Cross-chain</div>
-                        
-                        <div class="whale-reasoning">
-                            <strong>🧠 AI Analysis:</strong> Massive bridge activity to Arbitrum coincides with upcoming governance proposal. Wallet analysis reveals venture capital pattern. Likely strategic positioning for protocol influence.
-                        </div>
+                    <div id="whaleContainer">
+                        <!-- Dynamic whale alerts will be inserted here -->
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">📊 Market Intelligence</h3>
-                        <span class="confidence">97% Confidence</span>
+                        <h3 class="card-title">📊 Intelligence Metrics</h3>
+                        <span class="confidence">Live Data</span>
                     </div>
                     
                     <div class="metric">
                         <span>Whale Activity Score</span>
-                        <span class="metric-value">8.7/10</span>
+                        <span class="metric-value" id="whaleScore">8.7/10 <span class="metric-trend trend-up">↗ +0.3</span></span>
                     </div>
                     <div class="metric">
                         <span>Institution Inflow (24h)</span>
-                        <span class="metric-value">+$247M</span>
+                        <span class="metric-value" id="institutionFlow">+$247M <span class="metric-trend trend-up">↗ +12%</span></span>
                     </div>
                     <div class="metric">
-                        <span>Smart Money Flow</span>
-                        <span class="metric-value">Accumulating</span>
+                        <span>Smart Money Sentiment</span>
+                        <span class="metric-value" id="smartMoney">Accumulating <span class="metric-trend trend-up">↗</span></span>
                     </div>
                     <div class="metric">
                         <span>Narrative Momentum</span>
-                        <span class="metric-value">Bullish</span>
+                        <span class="metric-value" id="narrativeMomentum">Bullish <span class="metric-trend trend-up">↗</span></span>
                     </div>
                     <div class="metric">
-                        <span>Cross-chain Volume</span>
-                        <span class="metric-value">$1.2B</span>
+                        <span>Cross-Chain Volume</span>
+                        <span class="metric-value" id="crossChainVol">$1.2B <span class="metric-trend trend-up">↗ +18%</span></span>
                     </div>
                     <div class="metric">
-                        <span>AI Prediction Score</span>
-                        <span class="metric-value">Long Bias</span>
+                        <span>AI Confidence Level</span>
+                        <span class="metric-value" id="aiConfidence">94.7% <span class="metric-trend trend-up">↗</span></span>
                     </div>
                 </div>
             </div>
 
+            <!-- Narratives and Chart -->
             <div class="dashboard-grid">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">🔥 Emerging Narratives</h3>
-                        <span style="font-size: 0.9rem; color: #888;">Powered by Autonomous Reasoning</span>
+                        <h3 class="card-title">🧠 AI-Generated Narratives</h3>
+                        <div class="ai-badge">Autonomous Reasoning</div>
                     </div>
                     
-                    <div class="narrative-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong>RWA Tokenization Surge</strong>
-                            <span class="confidence">94%</span>
-                        </div>
-                        <div style="margin-top: 0.5rem; color: #ccc;">
-                            Detected 340% increase in RWA protocol activity. BlackRock partnership rumors driving institutional interest. AI predicts 2-week momentum window.
-                        </div>
-                    </div>
-
-                    <div class="narrative-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong>L2 Scaling Wars</strong>
-                            <span class="confidence">87%</span>
-                        </div>
-                        <div style="margin-top: 0.5rem; color: #ccc;">
-                            Arbitrum vs Base competition intensifying. $500M+ bridge volume surge. Fee wars beginning - expect aggressive token incentives.
-                        </div>
-                    </div>
-
-                    <div class="narrative-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong>AI Agent Economy</strong>
-                            <span class="confidence">91%</span>
-                        </div>
-                        <div style="margin-top: 0.5rem; color: #ccc;">
-                            Autonomous trading agents showing 23% portfolio outperformance. Institutional adoption accelerating. Infrastructure tokens benefiting.
-                        </div>
+                    <div id="narrativeContainer">
+                        <!-- Dynamic narratives will be inserted here -->
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">⚡ Chain Activity</h3>
+                        <h3 class="card-title">⚡ Multi-Chain Activity</h3>
                         <div class="loading"></div>
                     </div>
                     <div class="chart-container">
@@ -354,33 +646,44 @@
                 </div>
             </div>
 
+            <!-- Enterprise API Section -->
             <div class="card full-width">
                 <div class="card-header">
-                    <h3 class="card-title">🔌 Enterprise API Access</h3>
+                    <h3 class="card-title">🔌 Enterprise API & Intelligence Layer</h3>
                     <div class="enterprise-badge">Institutional Grade</div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
                     <div>
-                        <h4 style="margin-bottom: 1rem;">Real-time Data Endpoints</h4>
-                        <div class="api-endpoint">GET /api/v1/whale-movements</div>
-                        <div class="api-endpoint">GET /api/v1/narrative-intelligence</div>
-                        <div class="api-endpoint">GET /api/v1/cross-chain-flow</div>
+                        <h4 style="margin-bottom: 1.5rem; color: #667eea;">Real-time Intelligence Endpoints</h4>
+                        <div class="api-endpoint">GET /api/v1/whale-intelligence</div>
+                        <div class="api-endpoint">GET /api/v1/narrative-engine</div>
+                        <div class="api-endpoint">GET /api/v1/cross-chain-analytics</div>
                         <div class="api-endpoint">POST /api/v1/custom-alerts</div>
+                        <div class="api-endpoint">GET /api/v1/institution-flows</div>
+                        <div class="api-endpoint">POST /api/v1/ai-predictions</div>
                     </div>
                     <div>
-                        <h4 style="margin-bottom: 1rem;">Enterprise Features</h4>
+                        <h4 style="margin-bottom: 1.5rem; color: #667eea;">Enterprise Capabilities</h4>
                         <div class="metric">
                             <span>API Rate Limit</span>
-                            <span class="metric-value">10,000 req/min</span>
+                            <span class="metric-value">50,000 req/min</span>
                         </div>
                         <div class="metric">
                             <span>Data Latency</span>
-                            <span class="metric-value">< 100ms</span>
+                            <span class="metric-value">< 50ms</span>
                         </div>
                         <div class="metric">
-                            <span>Historical Data</span>
+                            <span>Historical Coverage</span>
                             <span class="metric-value">5+ Years</span>
+                        </div>
+                        <div class="metric">
+                            <span>Supported Chains</span>
+                            <span class="metric-value">15+ Networks</span>
+                        </div>
+                        <div class="metric">
+                            <span>AI Model Accuracy</span>
+                            <span class="metric-value">94.7%</span>
                         </div>
                         <div class="metric">
                             <span>Custom Analytics</span>
@@ -393,68 +696,107 @@
     </div>
 
     <script>
-        // Simulate real-time updates
-        function updateWhaleData() {
-            const amounts = ['$24.7M', '$18.2M', '$31.5M', '$42.1M', '$15.8M'];
-            const cryptos = ['USDC', 'ETH', 'ARB', 'BTC', 'MATIC'];
-            
-            // This would connect to real APIs in production
-            console.log('Fetching whale movements...');
-        }
-
-        // Chart setup
-        const ctx = document.getElementById('activityChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
-                datasets: [{
-                    label: 'Ethereum',
-                    data: [65, 72, 68, 81, 76, 85],
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    tension: 0.4
-                }, {
-                    label: 'Polygon',
-                    data: [35, 42, 38, 45, 48, 52],
-                    borderColor: '#8B5CF6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                    tension: 0.4
-                }]
+        // Enhanced data pools for more realistic demo
+        const whaleTransactions = [
+            { 
+                amount: '$47.2M', 
+                token: 'ETH', 
+                from: '0x742d...a8f3', 
+                to: 'Coinbase Prime', 
+                chain: 'Ethereum', 
+                analysis: 'Institutional custody deposit detected. Wallet linked to $2.8B family office. Pattern suggests long-term accumulation strategy with 89% historical accuracy.',
+                impact: 'high',
+                confidence: '96%'
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#ffffff'
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: '#888' },
-                        grid: { color: '#2a2a2f' }
-                    },
-                    y: {
-                        ticks: { color: '#888' },
-                        grid: { color: '#2a2a2f' }
-                    }
-                }
+            { 
+                amount: '$63.8M', 
+                token: 'USDC', 
+                from: 'Circle Treasury', 
+                to: '0x1f9a...b2c4', 
+                chain: 'Ethereum', 
+                analysis: 'Fresh USDC mint flowing to known institutional market maker. Historical data shows 73% correlation with major buy orders within 2 hours.',
+                impact: 'high',
+                confidence: '91%'
+            },
+            { 
+                amount: '$29.4M', 
+                token: 'ARB', 
+                from: 'Ethereum Bridge', 
+                to: 'Arbitrum One', 
+                chain: 'Cross-chain', 
+                analysis: 'Massive L2 migration coincides with upcoming governance vote. Wallet cluster analysis reveals coordinated institutional positioning.',
+                impact: 'medium',
+                confidence: '87%'
+            },
+            { 
+                amount: '$156.7M', 
+                token: 'BTC', 
+                from: '0x9f2e...c8b1', 
+                to: 'Fidelity Custody', 
+                chain: 'Bitcoin', 
+                analysis: 'Largest institutional BTC custody deposit this quarter. Matches quarterly DCA pattern of Fortune 500 treasury allocation.',
+                impact: 'high',
+                confidence: '98%'
+            },
+            { 
+                amount: '$38.1M', 
+                token: 'MATIC', 
+                from: '0x3a4f...d7e2', 
+                to: 'Polygon Staking', 
+                chain: 'Polygon', 
+                analysis: 'Large-scale staking activation suggests long-term bullish positioning. Correlates with insider activity before major announcements.',
+                impact: 'medium',
+                confidence: '85%'
             }
-        });
+        ];
 
-        // Simulate live updates
-        setInterval(updateWhaleData, 5000);
-        
-        // Add some interactivity
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelector('.nav-item.active').classList.remove('active');
-                this.classList.add('active');
-            });
-        });
-    </script>
-</body>
-</html>
+        const narratives = [
+            { 
+                title: 'AI Agent Economy Explosion', 
+                confidence: '96%', 
+                description: 'Autonomous trading agents showing 34% portfolio outperformance. $2.4B in AUM managed by AI. Infrastructure tokens seeing institutional adoption.',
+                trend: 'up'
+            },
+            { 
+                title: 'RWA Tokenization Mainstream', 
+                confidence: '92%', 
+                description: 'Real-world asset protocols surging 420% in TVL. BlackRock and Vanguard pilot programs driving institutional FOMO.',
+                trend: 'up'
+            },
+            { 
+                title: 'L2 Scaling Wars Intensify', 
+                confidence: '89%', 
+                description: 'Arbitrum vs Base vs Polygon competition hitting new highs. $8B in weekly bridge volume. Fee wars driving user migration.',
+                trend: 'up'
+            },
+            { 
+                title: 'Cross-Chain Liquidity Revolution', 
+                confidence: '94%', 
+                description: 'Intent-based bridging reaching $1B daily volume. Multi-chain strategies becoming institutional standard practice.',
+                trend: 'up'
+            },
+            { 
+                title: 'DeFi 3.0 Renaissance', 
+                confidence: '88%', 
+                description: 'Next-gen protocols with AI-powered yield optimization seeing massive institutional inflows. TVL growth accelerating.',
+                trend: 'up'
+            }
+        ];
+
+        // Enhanced state management
+        let currentWhaleIndex = 0;
+        let currentNarrativeIndex = 0;
+        let whaleActivityScore = 8.7;
+        let institutionInflow = 247;
+        let aiAccuracy = 94.7;
+        let totalVolume = 2.4;
+        let whaleCount = 1247;
+        let narrativeCount = 12;
+
+        // Chart setup with more realistic data
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        const gradient1 = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient1.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+        gradient1.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
+
+        const gradient2 = ctx.createLinearGradient(0,
